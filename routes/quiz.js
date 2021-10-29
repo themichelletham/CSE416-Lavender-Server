@@ -38,15 +38,16 @@ router.get('/:quiz_id', async (req, res) => {
   //res.send(`Gets Quiz by Id: ${req.params.quiz_id}`);
   const quiz_id = req.params.quiz_id;
 
-  const questions = await Questions.findAll({ where: { quiz_id: quiz_id } });
   const quiz = await Quizzes.findOne({ where: { quiz_id: quiz_id } })
     .catch(err => {
       console.log('GET QUIZ: ', err);
     })
   if (quiz == null)
     res.sendStatus(404);
-  else
+  else{
+    const questions = await quiz.getQuestions();
     res.json({ quiz: quiz, questions: questions });
+  }
 });
 
 router.post('/:quiz_id/results', (req, res) => {
@@ -84,7 +85,8 @@ router.put('/:quiz_id/question/', async (req, res) => {
     res.sendStatus(404);
     return;
   }
-  const questions = quiz.getQuestions();
+  const questions =  await quiz.getQuestions();
+  //console.log(questions)
   if (questions.length > questions_fields.length) {
     const delete_ids = [];
     for (let i = questions_fields.length; i < questions.length; ++i) {
@@ -100,10 +102,12 @@ router.put('/:quiz_id/question/', async (req, res) => {
     questions_fields[i].quiz_id = quiz_id;
     if (i < questions.length) {
       // ensure question_id is not changed
-      question_fields[i].question_id = questions.question_id;
-      await Questions.update(question_fields[i], {
+      const question_fields = {
+        question_text: questions_fields[i].question_text
+      }
+      await Questions.update(question_fields, {
         where: {
-          question_id: questions_fields[i].question_id,
+          question_id: questions[i].question_id
         }
       }).catch(err => {
         console.log('PUT Upate Question: ', err);
