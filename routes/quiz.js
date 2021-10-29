@@ -46,13 +46,13 @@ router.get('/:quiz_id', async (req, res) => {
     res.sendStatus(404);
   else {
     const questions = await quiz.getQuestions();
-    console.log(questions)
+    //console.log(questions)
     let answers = [];
     for(let i= 0; i<questions.length; ++i){
       let answer_list = await questions[i].getAnswers();
       answers.push(answer_list);
     }
-    console.log(answers)
+    //console.log(answers)
     res.json({ quiz: quiz, questions: questions, answers: answers });
   }
 });
@@ -125,11 +125,13 @@ router.put('/:quiz_id/question/', async (req, res) => {
       })
 
       const answers = await questions[i].getAnswers();
+      console.log(answers_fields);
       if (answers.length > answers_fields[i].length) {
         const delete_ids = [];
-        for (let i = answers_fields.length; i < answers.length; ++i) {
-          delete_ids.push(answers[i].answer_id);
+        for (let j = answers_fields[i].length; j < answers.length; ++j) {
+          delete_ids.push(answers[j].answer_id);
         }
+        console.log(delete_ids)
         await Answers.destroy({ where: { answer_id: delete_ids } })
           .catch(err => {
             console.log('DELETE Extra Answers: ', err);
