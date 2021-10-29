@@ -21,11 +21,11 @@ module.exports = (sequelize, DataTypes) => {
         },
     })
 
-    //Quizzes.associate = (models) => {
-    //    Quizzes.hasMany(models.Questions, {
-    //        foreignKey: 'quiz_id',
-    //        onDelete: "cascade",
-    //    });
+    Quizzes.associate = (models) => {
+        Quizzes.hasMany(models.Questions, {
+            foreignKey: 'quiz_id',
+            onDelete: "cascade",
+        });
     //    Quizzes.hasMany(models.History, {
     //        foreignKey: 'quiz_id',
     //        onDelete: "cascade",
@@ -33,6 +33,6 @@ module.exports = (sequelize, DataTypes) => {
     //    Quizzes.belongsTo(models.Platforms, {
     //        foreignKey: 'platform_id'
     //    });
-    //};
+    };
     return Quizzes;
 }
