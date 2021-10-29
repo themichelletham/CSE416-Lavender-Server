@@ -46,7 +46,14 @@ router.get('/:quiz_id', async (req, res) => {
     res.sendStatus(404);
   else {
     const questions = await quiz.getQuestions();
-    res.json({ quiz: quiz, questions: questions });
+    console.log(questions)
+    let answers = [];
+    for(let i= 0; i<questions.length; ++i){
+      let answer_list = await questions[i].getAnswers();
+      answers.push(answer_list);
+    }
+    console.log(answers)
+    res.json({ quiz: quiz, questions: questions, answers: answers });
   }
 });
 
