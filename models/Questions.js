@@ -18,13 +18,13 @@ module.exports = (sequelize, DataTypes) => {
     })
 
     Questions.associate = (models) => {
-        //Questions.hasMany(models.Answers, {
-        //    foreignKey: {
-        //        name: 'question_id',
-        //        allowNull: false,
-        //    },
-        //    onDelete: "cascade",
-        //});
+        Questions.hasMany(models.Answers, {
+            foreignKey: {
+                name: 'question_id',
+                allowNull: false,
+            },
+            onDelete: "cascade",
+        });
         //Questions.hasMany(models.UserAnswers, {
         //    foreignKey: {
         //        name: 'question_id',

@@ -44,9 +44,16 @@ router.get('/:quiz_id', async (req, res) => {
     })
   if (quiz == null)
     res.sendStatus(404);
-  else{
+  else {
     const questions = await quiz.getQuestions();
-    res.json({ quiz: quiz, questions: questions });
+    //console.log(questions)
+    let answers = [];
+    for(let i= 0; i<questions.length; ++i){
+      let answer_list = await questions[i].getAnswers();
+      answers.push(answer_list);
+    }
+    //console.log(answers)
+    res.json({ quiz: quiz, questions: questions, answers: answers });
   }
 });
 
@@ -73,20 +80,23 @@ router.put('/:quiz_id/creator', async (req, res) => {
 });
 
 router.put('/:quiz_id/question/', async (req, res) => {
-  //res.send(`Puts updated quiz by Id: ${req.params.quiz_id}`);
   //console.log(req);
   const quiz_id = req.params.quiz_id;
   const questions_fields = req.body.questions_fields;
+  const answers_fields = req.body.answers_fields;
+  if (answers_fields.length !== questions_fields.length) {
+    res.sendStatus(400);
+    return;
+  }
   const quiz = await Quizzes.findOne({ where: { quiz_id: quiz_id } })
     .catch(err => {
       console.log('GET QUIZ: ', err);
     });
-  if (quiz == null){
+  if (quiz == null) {
     res.sendStatus(404);
     return;
   }
-  const questions =  await quiz.getQuestions();
-  //console.log(questions)
+  const questions = await quiz.getQuestions();
   if (questions.length > questions_fields.length) {
     const delete_ids = [];
     for (let i = questions_fields.length; i < questions.length; ++i) {
@@ -100,11 +110,12 @@ router.put('/:quiz_id/question/', async (req, res) => {
   for (let i = 0; i < questions_fields.length; ++i) {
     // ensure quiz_id is not changed
     questions_fields[i].quiz_id = quiz_id;
+    const question_fields = {
+      quiz_id: quiz_id,
+      question_text: questions_fields[i].question_text
+    }
     if (i < questions.length) {
       // ensure question_id is not changed
-      const question_fields = {
-        question_text: questions_fields[i].question_text
-      }
       await Questions.update(question_fields, {
         where: {
           question_id: questions[i].question_id
@@ -112,16 +123,58 @@ router.put('/:quiz_id/question/', async (req, res) => {
       }).catch(err => {
         console.log('PUT Upate Question: ', err);
       })
+
+      const answers = await questions[i].getAnswers();
+      console.log(answers_fields);
+      if (answers.length > answers_fields[i].length) {
+        const delete_ids = [];
+        for (let j = answers_fields[i].length; j < answers.length; ++j) {
+          delete_ids.push(answers[j].answer_id);
+        }
+        console.log(delete_ids)
+        await Answers.destroy({ where: { answer_id: delete_ids } })
+          .catch(err => {
+            console.log('DELETE Extra Answers: ', err);
+          })
+      }
+      for (let j = 0; j < answers_fields[i].length; ++j) {
+        const answer_fields = {
+          question_id: questions[i].question_id,
+          answer_text: answers_fields[i][j].answer_text,
+          is_correct: answers_fields[i][j].is_correct,
+        };
+        if (j < answers.length) {
+          await Answers.update(answer_fields, {
+            where: {
+              answer_id: answers[j].answer_id,
+            }}).catch(err => {
+            console.log('PUT Update Answer: ', err);
+          })
+        }
+        else {
+          await Answers.create(answer_fields)
+            .catch(err => {
+              console.log('PUT Create Ans: ', err);
+            });
+        }
+      }
     }
     else {
-      const question_fields = {
-        quiz_id: questions_fields[i].quiz_id,
-        question_text: questions_fields[i].question_text
-      }
-      await Questions.create(question_fields)
+      const new_question = await Questions.create(question_fields)
         .catch(err => {
           console.log('POST Create Question: ', err);
         });
+      for (let j = 0; j < answers_fields[i].length; ++j) {
+        const answer_fields = {
+          question_id: new_question.question_id,
+          answer_text: answers_fields[i][j].answer_text,
+          is_correct: answers_fields[i][j].is_correct,
+        };
+        await Answers.create(answer_fields)
+          .catch(err => {
+            console.log('PUT Answers: ', err);
+          });
+      }
     }
   }
   res.sendStatus(204);
