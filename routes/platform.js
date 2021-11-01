@@ -8,6 +8,16 @@ router.get("/", (req, res) =>{
     res.send("Hello platforms");
 });
 
+router.post("/", async (req, res) =>{
+    console.log("Hello platforms");
+    const platform_fields = req.body.platform_fields;
+    const platform = await Platforms.create(platform_fields)
+        .catch( err => {
+            console.log('POST Platform: ', err);
+        });
+    res.status(201).send(platform);
+});
+
 router.get('/:platform_id/', async (req, res) => {
     res.send('Create Platform')
     //const platform = await Platorms.findOne({ where: { platform_id: req.params.platform_id } })
@@ -21,16 +31,16 @@ router.get('/:platform_id/', async (req, res) => {
 
 router.put('/:platform_id/creator', async (req, res) => {
     res.send('Platform Update');
-    //const platform = req.body;
-    //await Platforms.update(platform, {
-    //    where: {
-    //        platform_id: platform.platform_id
-    //    }
-    //}).catch( err => {
-    //    console.log('PUT Platform error: ', err);
-    //    res.sendStatus(404);
-    //});
-    //res.sendStatus(200);
+    const platform = req.body;
+    await Platforms.update(platform, {
+       where: {
+           platform_id: platform.platform_id
+       }
+    }).catch( err => {
+       console.log('PUT Platform error: ', err);
+       res.sendStatus(404);
+    });
+    res.sendStatus(200);
 });
 
 router.get('/:platform_id/search', async (req, res) => {
