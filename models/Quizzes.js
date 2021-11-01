@@ -1,31 +1,32 @@
 module.exports = (sequelize, DataTypes) => {
-    const Quizzes = sequelize.define("Quizzes", {
-        quiz_id: {
-            type: DataTypes.BIGINT,
-            allowNull: false,
-            autoIncrement: true,
-            primaryKey: true,
-        },
-        quiz_name: {
-          type: DataTypes.STRING,
-          allowNull: true // testing,
-        },
-        platform_id: {
-            type: DataTypes.BIGINT,
-            allowNull: false,
-            //foreignKey: true,
-        },
-        time_limit: {
-            type: DataTypes.TIME,
-            allowNull: true,
-        },
-    })
+  const Quizzes = sequelize.define("Quizzes", {
+    quiz_id: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    quiz_name: {
+      type: DataTypes.STRING,
+      allowNull: true // testing,
+    },
+    platform_id: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      //foreignKey: true,
+    },
+    time_limit: {
+      type: DataTypes.TIME,
+      allowNull: true,
+    },
+  })
 
-    //Quizzes.associate = (models) => {
-    //    Quizzes.hasMany(models.Questions, {
-    //        foreignKey: 'quiz_id',
-    //        onDelete: "cascade",
-    //    });
+  Quizzes.associate = (models) => {
+    Quizzes.hasMany(models.Questions, {
+      foreignKey: 'quiz_id',
+      onDelete: "cascade",
+      hooks: true,
+    });
     //    Quizzes.hasMany(models.History, {
     //        foreignKey: 'quiz_id',
     //        onDelete: "cascade",
@@ -33,6 +34,6 @@ module.exports = (sequelize, DataTypes) => {
     //    Quizzes.belongsTo(models.Platforms, {
     //        foreignKey: 'platform_id'
     //    });
-    //};
-    return Quizzes;
+  };
+  return Quizzes;
 }
