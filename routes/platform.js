@@ -19,14 +19,14 @@ router.post("/", async (req, res) =>{
 });
 
 router.get('/:platform_id/', async (req, res) => {
-    res.send('Create Platform')
-    //const platform = await Platorms.findOne({ where: { platform_id: req.params.platform_id } })
-    //    .catch( err => {
-    //        console.log('Get Platform error: ', err);
-    //    });
-    //if(platform == null)
-    //    res.sendStatus(404);
-    //res.json(platform);
+    // res.send('Create Platform')
+    const platform = await Platorms.findOne({ where: { platform_id: req.params.platform_id } })
+       .catch( err => {
+           console.log('Get Platform error: ', err);
+       });
+    if(platform == null)
+       res.sendStatus(404);
+    res.json(platform);
 });
 
 router.put('/:platform_id/creator', async (req, res) => {
