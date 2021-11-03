@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         user_id: {
             type: DataTypes.BIGINT,
             allowNull: false,
-            foreignKey: true,
+            //foreignKey: true,
         },
         platform_name: {
             type: DataTypes.STRING,
@@ -29,14 +29,16 @@ module.exports = (sequelize, DataTypes) => {
         Platforms.hasMany(models.Points, {
             foreignKey: 'platform_id',
             onDelete: "cascade",
+            hooks: true,
         });
-        //Platforms.hasMany(models.Quizzes, {
-        //    foreignKey: 'platform_id',
-        //    onDelete: "cascade",
+        Platforms.hasMany(models.Quizzes, {
+            foreignKey: 'platform_id',
+            onDelete: "cascade",
+            hooks: true,
+        });
+        //Platforms.belongsTo(models.Users, {
+        //    foreignKey: 'user_id'
         //});
-        Platforms.belongsTo(models.Users, {
-            foreignKey: 'user_id'
-        });
     };
     //Platforms.belongTo(models.Users)
     return Platforms;

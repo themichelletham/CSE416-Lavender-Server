@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
     platform_id: {
       type: DataTypes.BIGINT,
       allowNull: false,
-      //foreignKey: true,
+      foreignKey: true,
     },
     time_limit: {
       type: DataTypes.TIME,
@@ -27,13 +27,14 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: "cascade",
       hooks: true,
     });
-    //    Quizzes.hasMany(models.History, {
-    //        foreignKey: 'quiz_id',
-    //        onDelete: "cascade",
-    //    });
-    //    Quizzes.belongsTo(models.Platforms, {
-    //        foreignKey: 'platform_id'
-    //    });
+    Quizzes.hasMany(models.History, {
+      foreignKey: 'quiz_id',
+      onDelete: "cascade",
+      hooks: true,
+    });
+    Quizzes.belongsTo(models.Platforms, {
+      foreignKey: 'platform_id'
+    });
   };
   return Quizzes;
 }
