@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Quizzes, Answers, Questions } = require("../models");
+const { Quizzes, Answers, Questions, History, Points } = require("../models");
 
 
 router.get('/', async (req, res) => {
@@ -48,7 +48,7 @@ router.get('/:quiz_id', async (req, res) => {
     const questions = await quiz.getQuestions();
     //console.log(questions)
     let answers = [];
-    for(let i= 0; i<questions.length; ++i){
+    for (let i = 0; i < questions.length; ++i) {
       let answer_list = await questions[i].getAnswers();
       answers.push(answer_list);
     }
@@ -57,8 +57,54 @@ router.get('/:quiz_id', async (req, res) => {
   }
 });
 
-router.post('/:quiz_id/results', (req, res) => {
-  res.send(`Posts results of quiz by Id: ${req.params.quiz_id}`);
+router.post('/:quiz_id/results', async (req, res) => {
+  //res.send(`Posts results of quiz by Id: ${req.params.quiz_id}`);
+  const quiz_id = req.params.quiz_id;
+  const user_id = req.body.user_id;
+  const platform_id = req.body.platform_id;
+  const selected_answers = req.body.selected_answers;
+  const duration = req.body.duration;
+  const new_history = await History.create({
+    user_id: user_id,
+    quiz_id: quiz_id,
+  }).catch(err => {
+    console.log('POST Quiz Results: ', err);
+  });
+  if (new_history == null) {
+    res.sendStatus(500);
+    return;
+  }
+  const quiz = await Quizzes.findOne({ where: { quiz_id: quiz_id } })
+    .catch(err => {
+      console.log('POST Quiz Results: ', err);
+    });
+  if (quiz == null) {
+    res.sendStatus(500);
+    return;
+  }
+  const questions = await quiz.getQuestions();
+  let n_correct = 0;
+  for (let i = 0; i < questions.length; ++i) {
+    const answers = await questions[i].getAnswers({
+      order: [['answer_id', 'ASC']]
+    });
+    if (answers == null) {
+      res.sendStatus(500);
+      return;
+    }
+    if(answers[selected_answers[i]].is_correct)
+      n_correct++;
+  }
+  const multiplier = duration==null?1:quiz.time_limit/duration;
+  const points = n_correct*multiplier;
+  const new_points = await Points.create({
+    user_id: user_id,
+    platform_id: platform_id,
+    points: points,
+  }).catch(err => {
+    console.log('POST Quiz Results, Points: ', err);
+  });
+  res.status(201).send(new_points);
 });
 
 router.put('/:quiz_id/creator', async (req, res) => {
@@ -76,7 +122,6 @@ router.put('/:quiz_id/creator', async (req, res) => {
     console.log('PUT quiz creator: ', err);
     res.sendStatus(404);
   })
-
 });
 
 router.put('/:quiz_id/question/', async (req, res) => {
@@ -147,7 +192,8 @@ router.put('/:quiz_id/question/', async (req, res) => {
           await Answers.update(answer_fields, {
             where: {
               answer_id: answers[j].answer_id,
-            }}).catch(err => {
+            }
+          }).catch(err => {
             console.log('PUT Update Answer: ', err);
           })
         }

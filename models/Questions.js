@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         quiz_id: {
             type: DataTypes.BIGINT,
             allowNull: false,
-            //foreignKey: true,
+            foreignKey: true,
         },
         question_text: {
             type: DataTypes.STRING,
@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
             },
             onDelete: "cascade",
+            hooks: true,
         });
         //Questions.hasMany(models.UserAnswers, {
         //    foreignKey: {

@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         user_id: {
             type: DataTypes.BIGINT,
             allowNull: false,
-            foreignKey: true,
+            //foreignKey: true,
         },
         answer_id: {
             type: DataTypes.BIGINT,
@@ -23,9 +23,9 @@ module.exports = (sequelize, DataTypes) => {
     })
 
     UserAnswers.associate = (models) => {
-        UserAnswers.belongsTo(models.Users, {
-            foreignKey: 'question_id'
-        });
+        //UserAnswers.belongsTo(models.Users, {
+        //    foreignKey: 'question_id'
+        //});
         UserAnswers.belongsTo(models.Questions, {
             foreignKey: 'question_id'
         });

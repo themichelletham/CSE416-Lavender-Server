@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         user_id: {
             type: DataTypes.BIGINT,
             allowNull: false,
-            foreignKey: true,
+            //foreignKey: true,
         },
         platform_id: {
             type: DataTypes.BIGINT,
@@ -22,9 +22,9 @@ module.exports = (sequelize, DataTypes) => {
         },
     })
     Points.associate = (models) => {
-        Points.belongsTo(models.Users, {
-            foreignKey: 'user_id'
-        });
+        //Points.belongsTo(models.Users, {
+        //    foreignKey: 'user_id'
+        //});
         Points.belongsTo(models.Platforms, {
             foreignKey: 'platform_id'
         });
