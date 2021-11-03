@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const sequelize = require('sequelize');
-const { Platforms } = require ("../models");
+const { Quizzes, Platforms } = require ("../models");
 
 
 router.get("/", (req, res) =>{
@@ -20,7 +20,7 @@ router.post("/", async (req, res) =>{
 
 router.get('/:platform_id/', async (req, res) => {
     // res.send('Create Platform')
-    const platform = await Platorms.findOne({ where: { platform_id: req.params.platform_id } })
+    const platform = await Platforms.findOne({ where: { platform_id: req.params.platform_id } })
        .catch( err => {
            console.log('Get Platform error: ', err);
        });
@@ -41,6 +41,18 @@ router.put('/:platform_id/creator', async (req, res) => {
        res.sendStatus(404);
     });
     res.sendStatus(200);
+});
+
+
+router.get('/:platform_id/quizzes', async (req, res) => {
+   
+    const platformQuizzes = await Quizzes.findAll({ where: { platform_id: req.params.platform_id } })
+       .catch( err => {
+           console.log('Get Platform error: ', err);
+       });
+    if(platformQuizzes == null)
+       res.sendStatus(404);
+    res.json(platformQuizzes);
 });
 
 router.get('/:platform_id/search', async (req, res) => {
