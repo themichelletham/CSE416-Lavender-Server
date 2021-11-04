@@ -31,6 +31,22 @@ router.get('/:platform_id/', async (req, res) => {
   res.json(platform);
 });
 
+router.delete('/:platform_id', async (req, res) => {
+    //res.send('Deletes Quiz');
+    const platform_id = req.params.platform_id;
+    const platform = await Platforms.findOne({ where: { platform_id: platform_id } })
+      .catch(err => {
+        console.log('DELETE Platform: ', err);
+      })
+    if (platform != null) {
+      await platform.destroy()
+        .catch(err => {
+          console.log('DELETE PLATFORM: ', err);
+        })
+    }
+    res.sendStatus(204);
+  });
+
 router.put('/:platform_id/creator', async (req, res) => {
   //res.send('Platform Update');
   const platform_fields = req.body.platform_fields;
