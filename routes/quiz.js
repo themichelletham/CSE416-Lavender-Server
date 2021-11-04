@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Quizzes, Answers, Questions, History, Points } = require("../models");
+const { Quizzes, Answers, Questions, History, Points, UserAnswers } = require("../models");
 
 
 router.get('/', async (req, res) => {
@@ -35,7 +35,6 @@ router.delete('/:quiz_id', async (req, res) => {
 });
 
 router.get('/:quiz_id', async (req, res) => {
-  //res.send(`Gets Quiz by Id: ${req.params.quiz_id}`);
   const quiz_id = req.params.quiz_id;
 
   const quiz = await Quizzes.findOne({ where: { quiz_id: quiz_id } })
@@ -46,19 +45,17 @@ router.get('/:quiz_id', async (req, res) => {
     res.sendStatus(404);
   else {
     const questions = await quiz.getQuestions();
-    //console.log(questions)
     let answers = [];
     for (let i = 0; i < questions.length; ++i) {
       let answer_list = await questions[i].getAnswers();
       answers.push(answer_list);
     }
-    //console.log(answers)
-    res.json({ quiz: quiz, questions: questions, answers: answers });
+    const platform = await quiz.getPlatform();
+    res.json({ platform: platform, quiz: quiz, questions: questions, answers: answers });
   }
 });
 
 router.post('/:quiz_id/results', async (req, res) => {
-  //res.send(`Posts results of quiz by Id: ${req.params.quiz_id}`);
   const quiz_id = req.params.quiz_id;
   const user_id = req.body.user_id;
   const platform_id = req.body.platform_id;
@@ -104,16 +101,24 @@ router.post('/:quiz_id/results', async (req, res) => {
   }).catch(err => {
     console.log('POST Quiz Results, Points: ', err);
   });
+  for(let i = 0; i< selected_answers.length; ++i){
+    const answers = await questions[i].getAnswers();
+    const user_answer = await UserAnswers.create({
+      question_id: questions[i].question_id,
+      user_id: user_id,
+      answer_id: answers[selected_answers[i]].answer_id,
+    })
+    if(user_answer===null){
+      res.sendStatus(500);
+      return;
+    }
+  }
   res.status(201).send(new_points);
 });
 
 router.put('/:quiz_id/creator', async (req, res) => {
-  //res.send(`Puts updated quiz by Id: ${req.params.quiz_id}`);
-  //console.log(req.params)
   const quiz_id = req.params.quiz_id;
   const updates = req.body.quiz_fields;
-  //const {updates, questions} = req.body;
-  //console.log(req.body);
   await Quizzes.update(updates, {
     where: {
       quiz_id: quiz_id
@@ -125,7 +130,6 @@ router.put('/:quiz_id/creator', async (req, res) => {
 });
 
 router.put('/:quiz_id/question/', async (req, res) => {
-  //console.log(req);
   const quiz_id = req.params.quiz_id;
   const questions_fields = req.body.questions_fields;
   const answers_fields = req.body.answers_fields;
