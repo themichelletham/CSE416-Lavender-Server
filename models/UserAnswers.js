@@ -16,6 +16,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             //foreignKey: true,
         },
+        quiz_id: {
+            type: DataTypes.BIGINT,
+            allowNull: false,
+            foreignKey: true,
+        },
         answer_id: {
             type: DataTypes.BIGINT,
             allowNull: false,

@@ -106,6 +106,7 @@ router.post('/:quiz_id/results', async (req, res) => {
     const user_answer = await UserAnswers.create({
       question_id: questions[i].question_id,
       user_id: user_id,
+      quiz_id: quiz_id,
       answer_id: answers[selected_answers[i]].answer_id,
     })
     if(user_answer===null){
@@ -127,6 +128,51 @@ router.put('/:quiz_id/creator', async (req, res) => {
     console.log('PUT quiz creator: ', err);
     res.sendStatus(404);
   })
+});
+
+router.post('/:quiz_id/view-results', async (req, res) => {
+  //res.send(`Gets Quiz by Id: ${req.params.quiz_id}`);
+  const user_id = req.body.user_id;
+  const quiz_id = req.params.quiz_id;
+  const platform_id = req.body.platform_id;
+
+  const history = await History.findOne({where: {quiz_id: quiz_id, user_id: user_id}})
+    .catch(err => {
+      console.log("GET HISTORY", err)
+  })
+
+  if (history == null) {
+    res.sendStatus(500);
+    return;
+  }
+
+  const points = await Points.findOne({where: {platform_id: platform_id, user_id: user_id}})
+    .catch(err => {
+      console.log("GET POINTS", err)
+   })
+
+  const user_answers = await UserAnswers.findAll({where: {quiz_id: quiz_id, user_id: user_id}})
+    .catch(err => {
+      console.log("GET USER ANSWERS", err)
+  })
+
+  const quiz = await Quizzes.findOne({ where: { quiz_id: quiz_id } })
+    .catch(err => {
+      console.log('GET QUIZ: ', err);
+    })
+  if (quiz == null)
+    res.sendStatus(404);
+  else {
+    const questions = await quiz.getQuestions();
+    //console.log(questions)
+    let answers = [];
+    for(let i= 0; i<questions.length; ++i){
+      let answer_list = await questions[i].getAnswers();
+      answers.push(answer_list);
+    }
+    //console.log(answers)
+    res.json({ quiz: quiz, questions: questions, answers: user_answers, points: points });
+  }
 });
 
 router.put('/:quiz_id/question/', async (req, res) => {
