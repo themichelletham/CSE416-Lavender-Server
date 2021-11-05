@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             foreignKey: true,
         },
-        answer_id: {
+        answer_idx: {
             type: DataTypes.BIGINT,
             allowNull: false,
         },

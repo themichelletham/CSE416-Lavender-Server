@@ -15,11 +15,22 @@ router.post("/", async (req, res) => {
     .catch(err => {
       console.log('POST Quiz: ', err);
     });
-  res.status(201).send(quiz);
+  const platform = await quiz.getPlatform();
+  res.status(201).json({ platform: platform, quiz: quiz });
+});
+
+// termporary path
+router.post('/:quiz_id/history', async (req, res) => {
+  const quiz_id = req.params.quiz_id;
+  const user_id = req.body.user_id;
+  const history = await History.findOne({ where: { quiz_id: quiz_id, user_id: user_id } })
+    .catch(err => {
+      console.log('POST quiz history: ', err);
+    });
+  res.status(200).json({history: history});
 });
 
 router.delete('/:quiz_id', async (req, res) => {
-  //res.send('Deletes Quiz');
   const quiz_id = req.params.quiz_id;
   const quiz = await Quizzes.findOne({ where: { quiz_id: quiz_id } })
     .catch(err => {
@@ -89,11 +100,11 @@ router.post('/:quiz_id/results', async (req, res) => {
       res.sendStatus(500);
       return;
     }
-    if(answers[selected_answers[i]].is_correct)
+    if (answers[selected_answers[i]].is_correct)
       n_correct++;
   }
-  const multiplier = duration==null?1:quiz.time_limit/duration;
-  const points = n_correct*multiplier;
+  const multiplier = duration == null ? 1 : quiz.time_limit / duration;
+  const points = n_correct * multiplier;
   const new_points = await Points.create({
     user_id: user_id,
     platform_id: platform_id,
@@ -101,15 +112,14 @@ router.post('/:quiz_id/results', async (req, res) => {
   }).catch(err => {
     console.log('POST Quiz Results, Points: ', err);
   });
-  for(let i = 0; i< selected_answers.length; ++i){
-    const answers = await questions[i].getAnswers();
+  for (let i = 0; i < selected_answers.length; ++i) {
     const user_answer = await UserAnswers.create({
       question_id: questions[i].question_id,
       user_id: user_id,
       quiz_id: quiz_id,
-      answer_id: answers[selected_answers[i]].answer_id,
+      answer_idx: selected_answers[i],
     })
-    if(user_answer===null){
+    if (user_answer === null) {
       res.sendStatus(500);
       return;
     }
@@ -136,25 +146,31 @@ router.post('/:quiz_id/view-results', async (req, res) => {
   const quiz_id = req.params.quiz_id;
   const platform_id = req.body.platform_id;
 
-  const history = await History.findOne({where: {quiz_id: quiz_id, user_id: user_id}})
+  const history = await History.findOne({ where: { quiz_id: quiz_id, user_id: user_id } })
     .catch(err => {
       console.log("GET HISTORY", err)
-  })
+    })
 
   if (history == null) {
-    res.sendStatus(500);
-    return;
+    res.sendStatus(404);
+    return
   }
 
-  const points = await Points.findOne({where: {platform_id: platform_id, user_id: user_id}})
+  const points = await Points.findOne({ where: { platform_id: platform_id, user_id: user_id } })
     .catch(err => {
       console.log("GET POINTS", err)
-   })
+    })
 
-  const user_answers = await UserAnswers.findAll({where: {quiz_id: quiz_id, user_id: user_id}})
-    .catch(err => {
-      console.log("GET USER ANSWERS", err)
+  const user_answers = await UserAnswers.findAll({
+    where: { quiz_id: quiz_id, user_id: user_id },
+    order: [['question_id', 'ASC']]
+  }).catch(err => {
+    console.log("GET USER ANSWERS", err)
   })
+  let selected_answers = [];
+  for (let i = 0; i < user_answers.length; ++i) {
+    selected_answers.push(user_answers[i].answer_idx);
+  }
 
   const quiz = await Quizzes.findOne({ where: { quiz_id: quiz_id } })
     .catch(err => {
@@ -163,15 +179,20 @@ router.post('/:quiz_id/view-results', async (req, res) => {
   if (quiz == null)
     res.sendStatus(404);
   else {
-    const questions = await quiz.getQuestions();
+    const questions = await quiz.getQuestions({
+      order: [['question_id', 'ASC']]
+    });
     //console.log(questions)
     let answers = [];
-    for(let i= 0; i<questions.length; ++i){
-      let answer_list = await questions[i].getAnswers();
+    for (let i = 0; i < questions.length; ++i) {
+      let answer_list = await questions[i].getAnswers({
+        order: [['answer_id', 'ASC']]
+      });
       answers.push(answer_list);
     }
+    const platform = await quiz.getPlatform();
     //console.log(answers)
-    res.json({ quiz: quiz, questions: questions, answers: user_answers, points: points });
+    res.json({ platform: platform, quiz: quiz, questions: questions, answers: answers, selected_answers: selected_answers, points: points });
   }
 });
 
