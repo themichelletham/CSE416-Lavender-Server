@@ -6,20 +6,38 @@
     "database": "database_development",
 
     "host": "localhost",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "clientUrl": "http://localhost:3000",
+    "GOOGLE_CLIENT_ID": "583767602597-to2651a218j99e7c3q0p7ao7gjejj7vp.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "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",
+    "googleCallbackUrl": "http://localhost:3001/auth/google/callback",
+    "googleFailureRedirectUrl": "http://localhost:3000",
+    "googleSuccessRedirectUrl": "http://localhost:3000/login/success"
   },
   "test": {
     "username": "root",
     "password": null,
     "database": "database_test",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "clientUrl": "http://localhost:3000",
+    "GOOGLE_CLIENT_ID": "583767602597-to2651a218j99e7c3q0p7ao7gjejj7vp.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "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",
+    "googleCallbackUrl": "http://localhost:3001/auth/google/callback",
+    "googleFailureRedirectUrl": "http://localhost:3000",
+    "googleSuccessRedirectUrl": "http://localhost:3000/login/sucess"
   },
   "production": {
     "username": "b83604ccdd438e",
     "password": "3f9f9372",
     "database": "heroku_0156ee8f6a28ea5",
     "host": "us-cdbr-east-04.cleardb.com",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "clientUrl": "http://localhost:3000",
+    "GOOGLE_CLIENT_ID": "583767602597-to2651a218j99e7c3q0p7ao7gjejj7vp.apps.googleusercontent.com",
+    "GOOGLE_CLIENT_SECRET": "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",
+    "googleCallbackUrl": "https://lavender-sprout-backend.herokuapp.com/auth/google/callback",
+    "googleFailureRedirectUrl": "http://localhost:3000",
+    "googleSuccessRedirectUrl": "http://localhost:3000/login/success"
   }
 }
