@@ -4,12 +4,13 @@ const sequelize = require('sequelize');
 const { Quizzes, Platforms } = require("../models");
 
 
-router.get("/", (req, res) => {
-  res.send("Hello platforms");
+router.get("/", async (req, res) => {
+  const quizzes = await Quizzes.findAll();
+  const platforms = await Platforms.findAll();
+  res.status(200).send({quizzes: quizzes, platforms: platforms});
 });
 
 router.post("/", async (req, res) => {
-  console.log("Hello platforms");
   const platform_fields = req.body.platform_fields;
   const platform = await Platforms.create(platform_fields)
     .catch(err => {
