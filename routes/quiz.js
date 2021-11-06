@@ -72,16 +72,6 @@ router.post('/:quiz_id/results', async (req, res) => {
   const platform_id = req.body.platform_id;
   const selected_answers = req.body.selected_answers;
   const duration = req.body.duration;
-  const new_history = await History.create({
-    user_id: user_id,
-    quiz_id: quiz_id,
-  }).catch(err => {
-    console.log('POST Quiz Results: ', err);
-  });
-  if (new_history == null) {
-    res.sendStatus(500);
-    return;
-  }
   const quiz = await Quizzes.findOne({ where: { quiz_id: quiz_id } })
     .catch(err => {
       console.log('POST Quiz Results: ', err);
@@ -123,6 +113,17 @@ router.post('/:quiz_id/results', async (req, res) => {
       res.sendStatus(500);
       return;
     }
+  }
+  const new_history = await History.create({
+    user_id: user_id,
+    quiz_id: quiz_id,
+    points: points,
+  }).catch(err => {
+    console.log('POST Quiz Results: ', err);
+  });
+  if (new_history == null) {
+    res.sendStatus(500);
+    return;
   }
   res.status(201).send(new_points);
 });

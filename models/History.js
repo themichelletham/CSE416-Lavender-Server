@@ -9,12 +9,16 @@ module.exports = (sequelize, DataTypes) => {
     user_id: {
       type: DataTypes.BIGINT,
       allowNull: false,
-      //foreignKey: true,
+      foreignKey: true,
     },
     quiz_id: {
       type: DataTypes.BIGINT,
       allowNull: false,
       foreignKey: true,
+    },
+    points: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
     },
     duration: {
       type: DataTypes.TIME,
@@ -22,9 +26,9 @@ module.exports = (sequelize, DataTypes) => {
     },
   })
   History.associate = (models) => {
-    //History.belongsTo(models.Users, {
-    //  foreignKey: 'user_id'
-    //});
+    History.belongsTo(models.Users, {
+      foreignKey: 'user_id'
+    });
     History.belongsTo(models.Quizzes, {
       foreignKey: 'quiz_id'
     });

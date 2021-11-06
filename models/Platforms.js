@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         user_id: {
             type: DataTypes.BIGINT,
             allowNull: false,
-            //foreignKey: true,
+            foreignKey: true,
         },
         platform_name: {
             type: DataTypes.STRING,
@@ -36,10 +36,9 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: "cascade",
             hooks: true,
         });
-        //Platforms.belongsTo(models.Users, {
-        //    foreignKey: 'user_id'
-        //});
+        Platforms.belongsTo(models.Users, {
+            foreignKey: 'user_id'
+        });
     };
-    //Platforms.belongTo(models.Users)
     return Platforms;
 }
