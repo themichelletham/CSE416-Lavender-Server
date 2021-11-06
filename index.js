@@ -1,14 +1,27 @@
 const express = require('express');
-const cors = require('cors')
-require("dotenv").config();
+const passport = require('passport');
+const cors = require('cors');
 const app = express();
+const cookieSession = require('cookie-session');
+const env = process.env.NODE_ENV || 'development';
+const config = require(__dirname + '/config/config.json')[env];
+require('./auth/googleSSO');
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: config.clientUrl, credentials: true }));
+app.use(cookieSession({
+  maxAge: 24*60*60*1000,
+  keys: ['randomSalt'] //replace with bcrypt or something
+}))
 
 const db = require("./models");
 
 //Routers
+const authRouter = require('./routes/auth');
+app.use(passport.initialize());
+app.use(passport.session());
+app.use('/auth', authRouter);
+
 const platformRouter = require("./routes/platform");
 app.use("/platform", platformRouter);
 
@@ -17,9 +30,6 @@ app.use("/users", userRouter);
 
 const quizRouter = require("./routes/quiz");
 app.use("/quiz", quizRouter);
-
-const authRouter = require("./routes/auth");
-app.use("/authboard", authRouter);
 
 const searchRouter = require("./routes/search");
 app.use("/search", searchRouter);
