@@ -29,7 +29,15 @@ router.get('/:platform_id/', async (req, res) => {
     res.sendStatus(404);
     return;
   }
-  res.json(platform);
+  const quizzes = await Quizzes.findAll({ where: { platform_id: req.params.platform_id } })
+  .catch(err => {
+    console.log('Get Platform Quizzes error: ', err);
+  });
+if (quizzes == null) {
+  res.sendStatus(404);
+  return;
+}
+  res.json({platform_name: platform.platform_name, quizzes: quizzes });
 });
 
 router.delete('/:platform_id', async (req, res) => {
