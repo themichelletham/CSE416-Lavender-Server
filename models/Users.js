@@ -18,6 +18,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    points: {
+      type: DataTypes.BIGINT,
+      defaultValue: 0,
+      allowNull: true,
+    }
   })
 
   Users.associate = (models) => {
