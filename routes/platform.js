@@ -4,12 +4,13 @@ const sequelize = require('sequelize');
 const { Quizzes, Platforms } = require("../models");
 
 
-router.get("/", (req, res) => {
-  res.send("Hello platforms");
+router.get("/", async (req, res) => {
+  const quizzes = await Quizzes.findAll();
+  const platforms = await Platforms.findAll();
+  res.status(200).send({quizzes: quizzes, platforms: platforms});
 });
 
 router.post("/", async (req, res) => {
-  console.log("Hello platforms");
   const platform_fields = req.body.platform_fields;
   const platform = await Platforms.create(platform_fields)
     .catch(err => {
@@ -28,7 +29,15 @@ router.get('/:platform_id/', async (req, res) => {
     res.sendStatus(404);
     return;
   }
-  res.json(platform);
+  const quizzes = await Quizzes.findAll({ where: { platform_id: req.params.platform_id } })
+  .catch(err => {
+    console.log('Get Platform Quizzes error: ', err);
+  });
+if (quizzes == null) {
+  res.sendStatus(404);
+  return;
+}
+  res.json({platform_name: platform.platform_name, quizzes: quizzes });
 });
 
 router.delete('/:platform_id', async (req, res) => {
