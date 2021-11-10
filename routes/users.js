@@ -33,7 +33,7 @@ router.get('/:user_id', async (req, res) => {
   res.status(200).json({ user: user, points: points });
 });
 
-routers.put('/:user_id', async(req, res) => {
+router.put('/:user_id', async(req, res) => {
   const user_id = req.params.user_id;
   const updates = req.body.user_fields;
 
