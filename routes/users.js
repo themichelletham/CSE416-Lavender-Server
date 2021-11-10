@@ -36,12 +36,13 @@ router.get('/:user_id', async (req, res) => {
 router.put('/:user_id', async(req, res) => {
   const user_id = req.params.user_id;
   const updates = req.body.user_fields;
+  console.log(updates);
 
   const check = await Users.findOne({ where: {username: req.body.user_fields.username }})
   .catch(err => res.sendStatus(409));
-  
-  if (check != null){
-    await Users.update(updates, {
+
+  if (check == null){
+    await Users.update({username: updates.username}, {
       where: {
         user_id: user_id
       }
