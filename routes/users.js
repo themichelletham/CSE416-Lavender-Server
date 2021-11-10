@@ -38,7 +38,7 @@ routers.put('/:user_id', async(req, res) => {
   const updates = req.body.user_fields;
 
   const check = await Users.findOne({ where: {username: req.body.user_fields.username }})
-  .catch(err => res.send("Username already exists!"));
+  .catch(err => res.sendStatus(409));
   
   if (check != null){
     await Users.update(updates, {
