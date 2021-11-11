@@ -31,7 +31,7 @@ router.post("/", isAuthenticated, async (req, res) => {
     .catch(err => {
       console.log('POST Quiz: ', err);
     });
-  const platform = await quiz.getPlatform();
+  //const platform = await quiz.getPlatform();
   res.status(201).json({ platform: platform, quiz: quiz });
 });
 
