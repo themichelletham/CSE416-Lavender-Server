@@ -50,6 +50,8 @@ router.put('/:user_id', async(req, res) => {
       console.log('PUT user: ', err);
       res.sendStatus(404);
     })
+  } else {
+    res.sendStatus(409);
   }
 })
 
