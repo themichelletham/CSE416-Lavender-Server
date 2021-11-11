@@ -33,4 +33,26 @@ router.get('/:user_id', async (req, res) => {
   res.status(200).json({ user: user, points: points });
 });
 
+router.put('/:user_id', async(req, res) => {
+  const user_id = req.params.user_id;
+  const updates = req.body.user_fields;
+  console.log(updates);
+
+  const check = await Users.findOne({ where: {username: req.body.user_fields.username }})
+  .catch(err => res.sendStatus(409));
+
+  if (check == null){
+    await Users.update({username: updates.username}, {
+      where: {
+        user_id: user_id
+      }
+    }).catch(err => {
+      console.log('PUT user: ', err);
+      res.sendStatus(404);
+    })
+  } else {
+    res.sendStatus(409);
+  }
+})
+
 module.exports = router;
