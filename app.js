@@ -10,6 +10,7 @@ const userRouter = require("./routes/users");
 const platformRouter = require("./routes/platform");
 const quizRouter = require("./routes/quiz");
 const searchRouter = require("./routes/search");
+const imageRouter = require("./routes/image");
 
 var app = express();
 
@@ -29,6 +30,7 @@ app.use("/users", userRouter);
 app.use("/quiz", quizRouter);
 app.use("/auth", authRouter);
 app.use("/search", searchRouter);
+app.use("/image", imageRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -7,7 +7,8 @@ const env = process.env.NODE_ENV || 'development';
 const config = require(__dirname + '/config/config.json')[env];
 require('./auth/googleSSO');
 
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb', extended: true}));
 app.use(cors({ origin: config.clientUrl, credentials: true }));
 app.use(cookieSession({
   maxAge: 24*60*60*1000,
@@ -33,6 +34,9 @@ app.use("/quiz", quizRouter);
 
 const searchRouter = require("./routes/search");
 app.use("/search", searchRouter);
+
+const imageRouter = require("./routes/image");
+app.use("/image", imageRouter);
 
 
 db.sequelize.sync().then(() => {
