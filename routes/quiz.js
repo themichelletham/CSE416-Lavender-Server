@@ -1,7 +1,7 @@
 const express = require("express");
-const { isAuthenticated } = require('../auth/middlewares')
+const { isAuthenticated } = require("../auth/middlewares");
 const router = express.Router();
-const { Quizzes, Answers, Questions, History, Points, UserAnswers } = require("../models");
+const { Quizzes, Answers, Questions, History, Points, UserAnswers, Platforms } = require("../models");
 
 
 router.get('/', async (req, res) => {
@@ -9,7 +9,6 @@ router.get('/', async (req, res) => {
   res.status(200).send(quizzes);
 });
 
-// TODO: check if authenticated user is owner of platform
 router.post("/", isAuthenticated, async (req, res) => {
   //res.send("Hello quizzes");
   const platform = await Platforms.findOne({
@@ -21,7 +20,7 @@ router.post("/", isAuthenticated, async (req, res) => {
     res.status(500);
   })
   
-  if (platform.user_id === req.body.user_id) {
+  if (platform.user_id !== req.body.user_id) {
     res.sendStatus(401);
     return;
   }
