@@ -1,4 +1,5 @@
 const express = require("express");
+const { isAuthenticated } = require('../auth/middlewares')
 const router = express.Router();
 const { Quizzes, Answers, Questions, History, Points, UserAnswers } = require("../models");
 
@@ -8,8 +9,23 @@ router.get('/', async (req, res) => {
   res.status(200).send(quizzes);
 });
 
-router.post("/", async (req, res) => {
+// TODO: check if authenticated user is owner of platform
+router.post("/", isAuthenticated, async (req, res) => {
   //res.send("Hello quizzes");
+  const platform = await Platforms.findOne({
+    where: {
+      platform_id: req.body.quiz_fields.platform_id
+    }
+  }).catch(err => {
+    console.log('authUserIsCreating', err);
+    res.status(500);
+  })
+  
+  if (platform.user_id === req.body.user_id) {
+    res.sendStatus(401);
+    return;
+  }
+  
   const quiz_fields = req.body.quiz_fields;
   const quiz = await Quizzes.create(quiz_fields)
     .catch(err => {
