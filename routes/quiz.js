@@ -337,4 +337,35 @@ router.put('/:quiz_id/question/', async (req, res) => {
   res.sendStatus(204);
 });
 
+router.put('/:quiz_id/image-upload', async (req, res) => {
+  //res.send('Quiz Image');
+  const quiz_fields = req.body.quiz_fields;
+  console.log(quiz_fields);
+
+  await Quizzes.update(quiz_fields, {
+    where: {
+      quiz_id: req.params.quiz_id
+    }
+  }).catch(err => {
+    console.log('PUT Quiz error: ', err);
+  });
+  res.sendStatus(200);
+
+  return;
+});
+
+router.get('/:quiz_id/get-image', async (req, res) => {
+  // res.send('Get Quiz Image')
+  const quiz = await Quizzes.findOne({ where: { quiz_id: req.params.quiz_id } })
+    .catch(err => {
+      console.log('Get Quiz error: ', err);
+    });
+  if (quiz == null) {
+    res.sendStatus(404);
+    return;
+  }
+
+  res.json({icon_photo: quiz.icon_photo });
+});
+
 module.exports = router;

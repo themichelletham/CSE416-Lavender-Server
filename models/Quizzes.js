@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TIME,
       allowNull: true,
     },
+    icon_photo: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
   })
 
   Quizzes.associate = (models) => {
