@@ -35,10 +35,6 @@ app.use("/quiz", quizRouter);
 const searchRouter = require("./routes/search");
 app.use("/search", searchRouter);
 
-const imageRouter = require("./routes/image");
-app.use("/image", imageRouter);
-
-
 db.sequelize.sync().then(() => {
 
     app.listen(process.env.PORT || 3001, () => {
