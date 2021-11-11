@@ -16,11 +16,11 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         banner_photo: {
-            type: DataTypes.BLOB,
+            type: DataTypes.TEXT,
             allowNull: true,
         },
         icon_photo: {
-            type: DataTypes.BLOB,
+            type: DataTypes.TEXT,
             allowNull: true,
         },
     });
