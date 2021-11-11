@@ -114,7 +114,7 @@ router.post('/:quiz_id/results', async (req, res) => {
   const points = n_correct * multiplier;
 
   // Create or update points for user on specific platform
-  const points_rec = await Points.findOne({
+  var points_rec = await Points.findOne({
     where: {
       user_id: user_id,
       platform_id: platform_id,
@@ -129,7 +129,7 @@ router.post('/:quiz_id/results', async (req, res) => {
     await points_rec.save();
   }
   else {
-    const new_points = await Points.create({
+    points_rec = await Points.create({
       user_id: user_id,
       platform_id: platform_id,
       points: points,
@@ -164,7 +164,7 @@ router.post('/:quiz_id/results', async (req, res) => {
     res.sendStatus(500);
     return;
   }
-  res.status(201).send(new_points);
+  res.status(201).send(points_rec);
 });
 
 router.put('/:quiz_id/creator', async (req, res) => {
