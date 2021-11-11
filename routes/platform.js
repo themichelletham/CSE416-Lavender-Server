@@ -37,7 +37,7 @@ if (quizzes == null) {
   res.sendStatus(404);
   return;
 }
-  res.json({platform_name: platform.platform_name, quizzes: quizzes });
+  res.json({platform_name: platform.platform_name, icon_photo: platform.icon_photo, quizzes: quizzes });
 });
 
 router.delete('/:platform_id', async (req, res) => {
@@ -56,6 +56,8 @@ router.delete('/:platform_id', async (req, res) => {
     res.sendStatus(204);
   });
 
+
+
 router.put('/:platform_id/creator', async (req, res) => {
   //res.send('Platform Update');
   const platform_fields = req.body.platform_fields;
@@ -68,6 +70,38 @@ router.put('/:platform_id/creator', async (req, res) => {
   });
   res.sendStatus(200);
 });
+
+router.put('/:platform_id/image-upload', async (req, res) => {
+  //res.send('Platform Update');
+  const platform_fields = req.body.platform_fields;
+  console.log(platform_fields);
+
+  await Platforms.update(platform_fields, {
+    where: {
+      platform_id: req.params.platform_id
+    }
+  }).catch(err => {
+    console.log('PUT Platform error: ', err);
+  });
+  res.sendStatus(200);
+
+  return;
+});
+
+router.get('/:platform_id/get-image', async (req, res) => {
+  // res.send('Create Platform')
+  const platform = await Platforms.findOne({ where: { platform_id: req.params.platform_id } })
+    .catch(err => {
+      console.log('Get Platform error: ', err);
+    });
+  if (platform == null) {
+    res.sendStatus(404);
+    return;
+  }
+
+  res.json({icon_photo: platform.icon_photo });
+});
+
 
 
 router.get('/:platform_id/quizzes', async (req, res) => {
