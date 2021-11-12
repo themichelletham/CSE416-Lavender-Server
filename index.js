@@ -13,7 +13,6 @@ app.use(cors({ origin: config.clientUrl, credentials: true }));
 app.use(cookieSession({
   maxAge: 24*60*60*1000,
   keys: ['randomSalt'], //replace with bcrypt or something
-  secure: true,
   sameSite: 'none'
 }))
 
