@@ -37,7 +37,7 @@
     "GOOGLE_CLIENT_ID": "583767602597-to2651a218j99e7c3q0p7ao7gjejj7vp.apps.googleusercontent.com",
     "GOOGLE_CLIENT_SECRET": "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",
     "googleCallbackUrl": "https://lavender-sprout-backend.herokuapp.com/auth/google/callback",
-    "googleFailureRedirectUrl": "http://lavender-sprout.herokuapp.com",
-    "googleSuccessRedirectUrl": "http://lavender-sprout.herokuapp.com/login/success"
+    "googleFailureRedirectUrl": "https://lavender-sprout.herokuapp.com",
+    "googleSuccessRedirectUrl": "https://lavender-sprout.herokuapp.com/login/success"
   }
 }
