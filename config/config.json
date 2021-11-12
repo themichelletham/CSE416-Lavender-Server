@@ -33,7 +33,7 @@
     "database": "heroku_0156ee8f6a28ea5",
     "host": "us-cdbr-east-04.cleardb.com",
     "dialect": "mysql",
-    "clientUrl": "https://lavender-sprout.herokuapp.com/",
+    "clientUrl": "https://lavender-sprout.herokuapp.com",
     "GOOGLE_CLIENT_ID": "583767602597-to2651a218j99e7c3q0p7ao7gjejj7vp.apps.googleusercontent.com",
     "GOOGLE_CLIENT_SECRET": "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",
     "googleCallbackUrl": "https://lavender-sprout-backend.herokuapp.com/auth/google/callback",
