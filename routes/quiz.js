@@ -19,18 +19,49 @@ router.post("/", isAuthenticated, async (req, res) => {
     console.log('authUserIsCreating', err);
     res.status(500);
   })
-  
+
   if (platform.user_id !== req.body.user_id) {
     res.sendStatus(401);
     return;
   }
-  
+
   const quiz_fields = req.body.quiz_fields;
   const quiz = await Quizzes.create(quiz_fields)
     .catch(err => {
       console.log('POST Quiz: ', err);
     });
-  //const platform = await quiz.getPlatform();
+  const question = await Questions.create({
+    quiz_id: quiz.quiz_id,
+    question_text: 'New Question'
+  }).catch(err => {
+    console.log('POST Quiz question: ', err);
+  });
+  if (question === null) {
+    res.sendStatus(500);
+    return;
+  }
+  const answer1 = await Answers.create({
+    question_id: question.question_id,
+    answer_text: 'New Answer',
+    is_correct: true
+  }).catch(err => {
+    console.log('POST Quiz answer1: ', err);
+  });
+  if (answer1 === null) {
+    res.sendStatus(500);
+    return;
+  }
+  const answer2 = await Answers.create({
+    question_id: question.question_id,
+    answer_text: 'New Answer',
+    is_correct: false
+  }).catch(err => {
+    console.log('Post Quiz answer1: ', err);
+  });
+  if (answer2 === null) {
+    res.sendStatus(500);
+    return;
+  }
   res.status(201).json({ platform: platform, quiz: quiz });
 });
 
@@ -376,7 +407,7 @@ router.get('/:quiz_id/get-image', async (req, res) => {
     return;
   }
 
-  res.json({icon_photo: quiz.icon_photo });
+  res.json({ icon_photo: quiz.icon_photo });
 });
 
 module.exports = router;
