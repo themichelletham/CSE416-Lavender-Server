@@ -25,7 +25,6 @@ module.exports = (sequelize, DataTypes) => {
     Answers.belongsTo(models.Questions, {
       foreignKey: 'question_id',
       onDelete: 'cascade',
-      hooks: true,
     });
   }
   return Answers;
