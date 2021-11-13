@@ -87,6 +87,8 @@ router.post('/:quiz_id/results', async (req, res) => {
   const platform_id = req.body.platform_id;
   const selected_answers = req.body.selected_answers;
   const duration = req.body.duration;
+  const authenticated = req.body.authenticated;
+
   const quiz = await Quizzes.findOne({ where: { quiz_id: quiz_id } })
     .catch(err => {
       console.log('POST Quiz Results: ', err);
@@ -113,58 +115,67 @@ router.post('/:quiz_id/results', async (req, res) => {
   const multiplier = duration == null ? 1 : quiz.time_limit / duration;
   const points = n_correct * multiplier;
 
+  //do not create if authenticated is false
+  if (!authenticated){
+    console.log("UNAUTHENTICATED");
+  }
+  
+  console.log(platform_id);
   // Create or update points for user on specific platform
-  var points_rec = await Points.findOne({
-    where: {
-      user_id: user_id,
-      platform_id: platform_id,
-    }
-  }).catch(err => {
-    console.log('Post Quiz Results: Points: ', err);
-    res.sendStatus(500);
-    return;
-  });
-  if (points_rec !== null) {
-    points_rec.points = points_rec.points + points;
-    await points_rec.save();
-  }
-  else {
-    points_rec = await Points.create({
-      user_id: user_id,
-      platform_id: platform_id,
-      points: points,
+  if (authenticated){
+    var points_rec = await Points.findOne({
+      where: {
+        user_id: user_id,
+        platform_id: platform_id,
+      }
     }).catch(err => {
-      console.log('POST Quiz Results, Points: ', err);
+      console.log('Post Quiz Results: Points: ', err);
+      res.sendStatus(500);
+      return;
     });
-  }
+    if (points_rec !== null) {
+      points_rec.points = points_rec.points + points;
+      await points_rec.save();
+    }
+    else {
+      points_rec = await Points.create({
+        user_id: user_id,
+        platform_id: platform_id,
+        points: points,
+      }).catch(err => {
+        console.log('POST Quiz Results, Points: ', err);
+      });
+    }
 
-  // Create user records for previous answers
-  for (let i = 0; i < selected_answers.length; ++i) {
-    const user_answer = await UserAnswers.create({
-      question_id: questions[i].question_id,
+    // Create user records for previous answers
+    for (let i = 0; i < selected_answers.length; ++i) {
+      const user_answer = await UserAnswers.create({
+        question_id: questions[i].question_id,
+        user_id: user_id,
+        quiz_id: quiz_id,
+        answer_idx: selected_answers[i],
+      })
+      if (user_answer === null) {
+        res.sendStatus(500);
+        return;
+      }
+    }
+
+    // Create new history of user taking the quiz
+    const new_history = await History.create({
       user_id: user_id,
       quiz_id: quiz_id,
-      answer_idx: selected_answers[i],
-    })
-    if (user_answer === null) {
+      points: points,
+    }).catch(err => {
+      console.log('POST Quiz Results: ', err);
+    });
+    if (new_history == null) {
       res.sendStatus(500);
       return;
     }
-  }
 
-  // Create new history of user taking the quiz
-  const new_history = await History.create({
-    user_id: user_id,
-    quiz_id: quiz_id,
-    points: points,
-  }).catch(err => {
-    console.log('POST Quiz Results: ', err);
-  });
-  if (new_history == null) {
-    res.sendStatus(500);
-    return;
-  }
-  res.status(201).send(points_rec);
+    res.status(201).send(points_rec);
+}
 });
 
 router.put('/:quiz_id/creator', async (req, res) => {
