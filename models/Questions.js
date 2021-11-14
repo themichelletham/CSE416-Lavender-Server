@@ -26,13 +26,13 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: "cascade",
             hooks: true,
         });
-        //Questions.hasMany(models.UserAnswers, {
-        //    foreignKey: {
-        //        name: 'question_id',
-        //        allowNull: false,
-        //    },
-        //    onDelete: 'cascade',
-        //});
+        Questions.hasMany(models.UserAnswers, {
+            foreignKey: {
+                name: 'question_id',
+                allowNull: false,
+            },
+            onDelete: 'cascade',
+        });
         Questions.belongsTo(models.Quizzes, {
             foreignKey: 'quiz_id'
         });
