@@ -4,9 +4,15 @@ const { Users, Points } = require("../models");
 
 
 router.get("/", async (req, res) => {
-  res.send('GET All Users');
-  //const listOfUsers = await Users.findAll();
-  //res.json(listOfUsers);
+  //res.send('GET All Users');
+  const listOfUsers = await Users.findAll({
+    order: [['points', 'DESC']],
+  });
+  if (listOfUsers == null) {
+    res.sendStatus(400);
+    return;
+  }
+  res.json(listOfUsers);
 });
 
 router.post("/", async (req, res) => {
@@ -33,16 +39,16 @@ router.get('/:user_id', async (req, res) => {
   res.status(200).json({ user: user, points: points });
 });
 
-router.put('/:user_id', async(req, res) => {
+router.put('/:user_id', async (req, res) => {
   const user_id = req.params.user_id;
   const updates = req.body.user_fields;
   console.log(updates);
 
-  const check = await Users.findOne({ where: {username: req.body.user_fields.username }})
-  .catch(err => res.sendStatus(409));
+  const check = await Users.findOne({ where: { username: req.body.user_fields.username } })
+    .catch(err => res.sendStatus(409));
 
-  if (check == null){
-    await Users.update({username: updates.username}, {
+  if (check == null) {
+    await Users.update({ username: updates.username }, {
       where: {
         user_id: user_id
       }
