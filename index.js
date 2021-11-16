@@ -10,13 +10,12 @@ require("./auth/googleSSO");
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cors({ origin: config.clientUrl, credentials: true }));
-app.use(
-  cookieSession({
-    maxAge: 24 * 60 * 60 * 1000,
-    keys: ["randomSalt"], //replace with bcrypt or something
-    sameSite: "none",
-  })
-);
+app.use(cookieSession({
+  maxAge: 24*60*60*1000,
+  keys: ['randomSalt'], //replace with bcrypt or something
+  credentials: true,
+  sameSite: 'none'
+}))
 
 const db = require("./models");
 
