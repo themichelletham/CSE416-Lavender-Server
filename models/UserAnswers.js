@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: true,
         },
         user_id: {
-            type: DataTypes.BIGINT,
+            type: DataTypes.UUIDV4,
             allowNull: false,
             //foreignKey: true,
         },
