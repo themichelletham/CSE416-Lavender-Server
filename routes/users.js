@@ -34,6 +34,7 @@ router.get('/:user_id', async (req, res) => {
     return;
   }
   const points = await user.getPoints({
+    limit: 100,
     order: [['points', 'DESC']]
   });
   res.status(200).json({ user: user, points: points });
