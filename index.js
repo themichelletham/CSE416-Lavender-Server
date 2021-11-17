@@ -13,8 +13,9 @@ app.use(cors({ origin: config.clientUrl, credentials: true }));
 app.use(cookieSession({
   maxAge: 24*60*60*1000,
   keys: ['randomSalt'], //replace with bcrypt or something
-  credentials: true,
-  sameSite: 'none'
+  //credentials: true,
+  //sameSite: 'none',
+  //secure: true
 }))
 
 const db = require("./models");

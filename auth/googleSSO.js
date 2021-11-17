@@ -23,6 +23,8 @@ passport.use(new GoogleStrategy({
     console.log('error', err);
     done(err, null);
   })
+  user[0].username = user[0].user_id;
+  await user[0].save();
   if (user && user[0])
     return done(null, user && user[0])
 }));
