@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const sequelize = require('sequelize');
+const { Op } = require('sequelize');
 const { Quizzes, Platforms, Users } = require("../models");
 
 router.get("/", async (req, res) => {
@@ -18,8 +18,8 @@ router.post("/", async (req, res) => {
   res.status(201).send(platform);
 });
 
-router.get('/:platform_id/', async (req, res) => {
-  // res.send('Create Platform')
+router.get('/:platform_id', async (req, res) => {
+  const keyword = req.query.keyword;
   const platform = await Platforms.findOne({ where: { platform_id: req.params.platform_id } })
     .catch(err => {
       console.log('Get Platform error: ', err);
@@ -28,7 +28,21 @@ router.get('/:platform_id/', async (req, res) => {
     res.sendStatus(404);
     return;
   }
-  const quizzes = await Quizzes.findAll({ where: { platform_id: req.params.platform_id } })
+  const quizzes = await platform.getQuizzes({
+    where: {
+      quiz_name: {
+        [Op.like]: "%" + keyword + "%",
+      }
+    }
+  })
+    //const quizzes = await Quizzes.findAll({ 
+    //  where: { 
+    //    platform_id: req.params.platform_id,
+    //    quiz_name: {
+    //      [Op.like]: "%" + keyword + "%",
+    //    }
+    //  } 
+    //})
     .catch(err => {
       console.log('Get Platform Quizzes error: ', err);
     });
