@@ -5,7 +5,9 @@ const { Users, Points } = require("../models");
 
 router.get("/", async (req, res) => {
   //res.send('GET All Users');
+  const limit = req.params ? req.params.limit : 100;
   const listOfUsers = await Users.findAll({
+    limit: limit,
     order: [['points', 'DESC']],
   });
   if (listOfUsers == null) {
