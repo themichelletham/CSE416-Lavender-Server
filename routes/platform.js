@@ -34,23 +34,40 @@ router.get('/:platform_id', async (req, res) => {
         [Op.like]: "%" + keyword + "%",
       }
     }
-  })
-    //const quizzes = await Quizzes.findAll({ 
-    //  where: { 
-    //    platform_id: req.params.platform_id,
-    //    quiz_name: {
-    //      [Op.like]: "%" + keyword + "%",
-    //    }
-    //  } 
-    //})
-    .catch(err => {
+  }).catch(err => {
       console.log('Get Platform Quizzes error: ', err);
     });
   if (quizzes == null) {
     res.sendStatus(404);
     return;
   }
-  res.json({ platform_name: platform.platform_name, icon_photo: platform.icon_photo, quizzes: quizzes });
+  const points = await platform.getPoints({
+    limit: 5,
+    order: [['points', 'DESC']],
+  }).catch(err => {
+    console.log('GET Platforms Points: ', err);
+  })
+
+  if (points === null) {
+    res.sendStatus(500);
+    return;
+  }
+  const names = [];
+  for (let i = 0; i < points.length; ++i) {
+    const user = await Users.findOne({
+      where: {
+        user_id: points[i].user_id,
+      }
+    }).catch(err => {
+      console.log('GET Platforms Points User: ', err);
+    });
+    if (user === null) {
+      res.sendStatus(500);
+      return;
+    }
+    names.push(user.username);
+  }
+  res.json({ platform_name: platform.platform_name, icon_photo: platform.icon_photo, quizzes: quizzes, topFiveUsers: names });
 });
 
 router.delete('/:platform_id', async (req, res) => {
@@ -147,48 +164,6 @@ router.get('/:platform_id/search', async (req, res) => {
   //    }
   //});
   //res.json(search_results)
-});
-
-router.get('/:platform_id/users', async (req, res) => {
-  const platform_id = req.params.platform_id;
-  const platform = await Platforms.findOne({
-    where: {
-      platform_id: platform_id,
-    }
-  }).catch(err => {
-    console.log('GET Platforms Points platform: ', err);
-  });
-  if (platform === null) {
-    res.sendStatus(500);
-    return;
-  }
-  const points = await platform.getPoints({
-    limit: 10,
-    order: [['points', 'DESC']],
-  }).catch(err => {
-    console.log('GET Platforms Points: ', err);
-  })
-
-  if (points === null) {
-    res.sendStatus(500);
-    return;
-  }
-  const names = [];
-  for (let i = 0; i < points.length; ++i) {
-    const user = await Users.findOne({
-      where: {
-        user_id: points[i].user_id,
-      }
-    }).catch(err => {
-      console.log('GET Platforms Points User: ', err);
-    });
-    if (user === null) {
-      res.sendStatus(500);
-      return;
-    }
-    names.push(user.username);
-  }
-  res.status(200).json(names);
 });
 
 module.exports = router;
