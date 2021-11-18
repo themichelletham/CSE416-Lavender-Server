@@ -9,6 +9,7 @@ const {
   Points,
   UserAnswers,
   Platforms,
+  Users
 } = require("../models");
 
 router.get("/", async (req, res) => {
@@ -74,13 +75,21 @@ router.post("/", isAuthenticated, async (req, res) => {
 // termporary path
 router.post("/:quiz_id/history", async (req, res) => {
   const quiz_id = req.params.quiz_id;
+  if(req.body.user_id === null){
+    res.sendStatus(400);
+    return;
+  }
   const user_id = req.body.user_id;
   const history = await History.findOne({
     where: { quiz_id: quiz_id, user_id: user_id },
   }).catch((err) => {
     console.log("POST quiz history: ", err);
   });
-  res.status(200).json({ history: history });
+  if (history !== null) {
+    res.status(200).json({ history: history });
+    return;
+  }
+  res.sendStatus(404);
 });
 
 router.delete("/:quiz_id", async (req, res) => {
@@ -154,11 +163,24 @@ router.post("/:quiz_id/results", async (req, res) => {
     }
     if (answers[selected_answers[i]].is_correct) n_correct++;
   }
-  const multiplier = duration == null ? 1 : quiz.time_limit / duration;
+  const multiplier = duration === null ? 1 : quiz.time_limit / duration;
   const points = n_correct * multiplier;
 
   // Create or update points for user on specific platform
-  if (user_id != null) {
+  if (user_id !== null) {
+    const user = await Users.findOne({
+      where: {
+        user_id: user_id,
+      }
+    }).catch(err => {
+      console.log("POST Quiz Results; User: ", err);
+      res.sendStatus(500);
+      return;
+    });
+    if (user !== null){
+      user.points = user.points + points;
+      await user.save();
+    }
     var points_rec = await Points.findOne({
       where: {
         user_id: user_id,
