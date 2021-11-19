@@ -19,6 +19,8 @@ app.use(cors({ origin: config.clientUrl, credentials: true }));
 //  secure: true
 //}))
 
+app.set("trust proxy", 1);
+
 app.use(session({
   secret: 'randommSalt',
   resave: true,
