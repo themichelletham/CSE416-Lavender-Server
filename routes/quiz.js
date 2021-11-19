@@ -9,7 +9,7 @@ const {
   Points,
   UserAnswers,
   Platforms,
-  Users
+  Users,
 } = require("../models");
 
 router.get("/", async (req, res) => {
@@ -75,7 +75,7 @@ router.post("/", isAuthenticated, async (req, res) => {
 // termporary path
 router.post("/:quiz_id/history", async (req, res) => {
   const quiz_id = req.params.quiz_id;
-  if(req.body.user_id === null){
+  if (req.body.user_id === null) {
     res.sendStatus(400);
     return;
   }
@@ -129,6 +129,7 @@ router.get("/:quiz_id", async (req, res) => {
       quiz: quiz,
       questions: questions,
       answers: answers,
+      icon_photo: platform.icon_photo,
     });
   }
 });
@@ -171,13 +172,13 @@ router.post("/:quiz_id/results", async (req, res) => {
     const user = await Users.findOne({
       where: {
         user_id: user_id,
-      }
-    }).catch(err => {
+      },
+    }).catch((err) => {
       console.log("POST Quiz Results; User: ", err);
       res.sendStatus(500);
       return;
     });
-    if (user !== null){
+    if (user !== null) {
       user.points = user.points + points;
       await user.save();
     }
