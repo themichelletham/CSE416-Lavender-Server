@@ -2,7 +2,8 @@ const express = require("express");
 const passport = require("passport");
 const cors = require("cors");
 const app = express();
-const cookieSession = require("cookie-session");
+//const cookieSession = require("cookie-session");
+const session = require('express-session');
 const env = process.env.NODE_ENV || "development";
 const config = require(__dirname + "/config/config.json")[env];
 require("./auth/googleSSO");
@@ -10,13 +11,24 @@ require("./auth/googleSSO");
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cors({ origin: config.clientUrl, credentials: true }));
-app.use(cookieSession({
-  maxAge: 24*60*60*1000,
-  keys: ['randomSalt'], //replace with bcrypt or something
-  //credentials: true,
-  sameSite: "none",
-  secure: true
-}))
+//app.use(cookieSession({
+//  maxAge: 24*60*60*1000,
+//  keys: ['randomSalt'], //replace with bcrypt or something
+//  //credentials: true,
+//  sameSite: "none",
+//  secure: true
+//}))
+
+app.use(session({
+  secret: 'randommSalt',
+  resave: true,
+  saveUninitialized: true,
+  cookie: {
+    sameSite: "none",
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000,
+  }
+}));
 
 const db = require("./models");
 
