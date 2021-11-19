@@ -15,7 +15,7 @@ router.post("/", async (req, res) => {
     .catch(err => {
       console.log('POST Platform: ', err);
     });
-  res.status(201).send(platform);
+  res.status(201).json(platform);
 });
 
 router.get('/:platform_id', async (req, res) => {
