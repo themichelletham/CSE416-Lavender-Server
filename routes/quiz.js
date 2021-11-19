@@ -129,7 +129,7 @@ router.get("/:quiz_id", async (req, res) => {
       quiz: quiz,
       questions: questions,
       answers: answers,
-      icon_photo: platform.icon_photo,
+      icon_photo: quiz.icon_photo,
     });
   }
 });
