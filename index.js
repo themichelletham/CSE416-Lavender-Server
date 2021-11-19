@@ -14,8 +14,8 @@ app.use(cookieSession({
   maxAge: 24*60*60*1000,
   keys: ['randomSalt'], //replace with bcrypt or something
   //credentials: true,
-  //sameSite: 'none',
-  //secure: true
+  sameSite: "none",
+  secure: true
 }))
 
 const db = require("./models");
