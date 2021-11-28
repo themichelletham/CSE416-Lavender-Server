@@ -52,7 +52,7 @@ router.get('/:platform_id', async (req, res) => {
     res.sendStatus(500);
     return;
   }
-  const names = [];
+  const topusers = [];
   for (let i = 0; i < points.length; ++i) {
     const user = await Users.findOne({
       where: {
@@ -65,9 +65,9 @@ router.get('/:platform_id', async (req, res) => {
       res.sendStatus(500);
       return;
     }
-    names.push(user.username);
+    topusers.push(user);
   }
-  res.json({ platform_name: platform.platform_name, icon_photo: platform.icon_photo, quizzes: quizzes, topFiveUsers: names });
+  res.json({ platform_name: platform.platform_name, icon_photo: platform.icon_photo, quizzes: quizzes, topFiveUsers: topusers });
 });
 
 router.delete('/:platform_id', async (req, res) => {
