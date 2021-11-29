@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Op } = require('sequelize');
+const { Op } = require("sequelize");
 const { Quizzes, Platforms, Users } = require("../models");
 
 router.get("/", async (req, res) => {
@@ -11,42 +11,46 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   const platform_fields = req.body.platform_fields;
-  const platform = await Platforms.create(platform_fields)
-    .catch(err => {
-      console.log('POST Platform: ', err);
-    });
+  const platform = await Platforms.create(platform_fields).catch((err) => {
+    console.log("POST Platform: ", err);
+  });
   res.status(201).json(platform);
 });
 
-router.get('/:platform_id', async (req, res) => {
+router.get("/:platform_id", async (req, res) => {
   const keyword = req.query.keyword;
-  const platform = await Platforms.findOne({ where: { platform_id: req.params.platform_id } })
-    .catch(err => {
-      console.log('Get Platform error: ', err);
-    });
+  const platform = await Platforms.findOne({
+    where: { platform_id: req.params.platform_id },
+  }).catch((err) => {
+    console.log("Get Platform error: ", err);
+  });
   if (platform == null) {
     res.sendStatus(404);
     return;
   }
-  const quizzes = await platform.getQuizzes({
-    where: {
-      quiz_name: {
-        [Op.like]: "%" + keyword + "%",
-      }
-    }
-  }).catch(err => {
-      console.log('Get Platform Quizzes error: ', err);
+  const quizzes = await platform
+    .getQuizzes({
+      where: {
+        quiz_name: {
+          [Op.like]: "%" + keyword + "%",
+        },
+      },
+    })
+    .catch((err) => {
+      console.log("Get Platform Quizzes error: ", err);
     });
   if (quizzes == null) {
     res.sendStatus(404);
     return;
   }
-  const points = await platform.getPoints({
-    limit: 5,
-    order: [['points', 'DESC']],
-  }).catch(err => {
-    console.log('GET Platforms Points: ', err);
-  })
+  const points = await platform
+    .getPoints({
+      limit: 5,
+      order: [["points", "DESC"]],
+    })
+    .catch((err) => {
+      console.log("GET Platforms Points: ", err);
+    });
 
   if (points === null) {
     res.sendStatus(500);
@@ -57,9 +61,9 @@ router.get('/:platform_id', async (req, res) => {
     const user = await Users.findOne({
       where: {
         user_id: points[i].user_id,
-      }
-    }).catch(err => {
-      console.log('GET Platforms Points User: ', err);
+      },
+    }).catch((err) => {
+      console.log("GET Platforms Points User: ", err);
     });
     if (user === null) {
       res.sendStatus(500);
@@ -67,75 +71,85 @@ router.get('/:platform_id', async (req, res) => {
     }
     topusers.push(user);
   }
-  res.json({ platform_name: platform.platform_name, icon_photo: platform.icon_photo, quizzes: quizzes, topFiveUsers: topusers });
+  res.json({
+    platform_name: platform.platform_name,
+    icon_photo: platform.icon_photo,
+    banner_photo: platform.banner_photo,
+    quizzes: quizzes,
+    topFiveUsers: topusers,
+  });
 });
 
-router.delete('/:platform_id', async (req, res) => {
+router.delete("/:platform_id", async (req, res) => {
   //res.send('Deletes Quiz');
   const platform_id = req.params.platform_id;
-  const platform = await Platforms.findOne({ where: { platform_id: platform_id } })
-    .catch(err => {
-      console.log('DELETE Platform: ', err);
-    })
+  const platform = await Platforms.findOne({
+    where: { platform_id: platform_id },
+  }).catch((err) => {
+    console.log("DELETE Platform: ", err);
+  });
   if (platform != null) {
-    await platform.destroy()
-      .catch(err => {
-        console.log('DELETE PLATFORM: ', err);
-      })
+    await platform.destroy().catch((err) => {
+      console.log("DELETE PLATFORM: ", err);
+    });
   }
   res.sendStatus(204);
 });
 
-router.put('/:platform_id/creator', async (req, res) => {
+router.put("/:platform_id/creator", async (req, res) => {
   //res.send('Platform Update');
   const platform_fields = req.body.platform_fields;
   await Platforms.update(platform_fields, {
     where: {
-      platform_id: req.params.platform_id
-    }
-  }).catch(err => {
-    console.log('PUT Platform error: ', err);
+      platform_id: req.params.platform_id,
+    },
+  }).catch((err) => {
+    console.log("PUT Platform error: ", err);
   });
   res.sendStatus(200);
 });
 
-router.put('/:platform_id/image-upload', async (req, res) => {
+router.put("/:platform_id/image-upload", async (req, res) => {
   //res.send('Platform Update');
   const platform_fields = req.body.platform_fields;
   console.log(platform_fields);
 
   await Platforms.update(platform_fields, {
     where: {
-      platform_id: req.params.platform_id
-    }
-  }).catch(err => {
-    console.log('PUT Platform error: ', err);
+      platform_id: req.params.platform_id,
+    },
+  }).catch((err) => {
+    console.log("PUT Platform error: ", err);
   });
   res.sendStatus(200);
 
   return;
 });
 
-router.get('/:platform_id/get-image', async (req, res) => {
+router.get("/:platform_id/get-image", async (req, res) => {
   // res.send('Create Platform')
-  const platform = await Platforms.findOne({ where: { platform_id: req.params.platform_id } })
-    .catch(err => {
-      console.log('Get Platform error: ', err);
-    });
+  const platform = await Platforms.findOne({
+    where: { platform_id: req.params.platform_id },
+  }).catch((err) => {
+    console.log("Get Platform error: ", err);
+  });
   if (platform == null) {
     res.sendStatus(404);
     return;
   }
 
-  res.json({ icon_photo: platform.icon_photo });
+  res.json({
+    icon_photo: platform.icon_photo,
+    banner_photo: platform.banner_photo,
+  });
 });
 
-router.get('/:platform_id/quizzes', async (req, res) => {
-
-  const platformQuizzes = await Quizzes.findAll({ where: { platform_id: req.params.platform_id } })
-    .catch(err => {
-      console.log('Get Platform error: ', err);
-    });
+router.get("/:platform_id/quizzes", async (req, res) => {
+  const platformQuizzes = await Quizzes.findAll({
+    where: { platform_id: req.params.platform_id },
+  }).catch((err) => {
+    console.log("Get Platform error: ", err);
+  });
   if (platformQuizzes == null) {
     res.sendStatus(404);
     return;
@@ -143,12 +157,12 @@ router.get('/:platform_id/quizzes', async (req, res) => {
   res.json(platformQuizzes);
 });
 
-router.get('/:platform_id/search', async (req, res) => {
-  res.send('Platform Quiz Search');
-  //const platform = await Platforms.findOne({ 
-  //    where: { 
-  //        platform_id: req.params.platform_id 
-  //    } 
+router.get("/:platform_id/search", async (req, res) => {
+  res.send("Platform Quiz Search");
+  //const platform = await Platforms.findOne({
+  //    where: {
+  //        platform_id: req.params.platform_id
+  //    }
   //}).catch( err => {
   //    console.log('GET Platform Search: ', err);
   //});
