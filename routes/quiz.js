@@ -146,20 +146,15 @@ router.put("/toggle_publish/:platform_id", async (req, res) => {
     }
   })
 
-  const quiz_ids = [];
   const quiz_list = await platform
     .getQuizzes()
     .catch((err) => {console.log("Get Platform Quizzes error: ", err);
   });
 
   for (let i = 0; i < quiz_list.length; ++i) {
-    quiz_ids.push(quiz_list[i].dataValues.quiz_id);
-  }  
-
-  for (let i = 0; i < quiz_ids.length; ++i) {
     await Quizzes.update(quiz_field[i], {
       where: {
-        quiz_id: quiz_ids[i],
+        quiz_id: quiz_list[i].dataValues.quiz_id,
       }
     }).catch((err) => {
         console.log("PUT Quiz error: ", err);
