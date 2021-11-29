@@ -107,12 +107,12 @@ router.put("/:platform_id/creator", async (req, res) => {
     console.log("PUT Platform error: ", err);
   });
   res.sendStatus(200);
+  return;
 });
 
 router.put("/:platform_id/image-upload", async (req, res) => {
   //res.send('Platform Update');
   const platform_fields = req.body.platform_fields;
-  console.log(platform_fields);
 
   await Platforms.update(platform_fields, {
     where: {
