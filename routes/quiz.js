@@ -130,6 +130,7 @@ router.get("/:quiz_id", async (req, res) => {
       questions: questions,
       answers: answers,
       icon_photo: quiz.icon_photo,
+      is_published: quiz.is_published,
     });
   }
 });

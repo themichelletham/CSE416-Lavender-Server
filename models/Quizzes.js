@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    is_published: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    }
   })
 
   Quizzes.associate = (models) => {
