@@ -1,5 +1,6 @@
 const express = require("express");
 const { isAuthenticated } = require("../auth/middlewares");
+const { Op } = require("sequelize");
 const router = express.Router();
 const {
   Quizzes,
@@ -10,6 +11,7 @@ const {
   UserAnswers,
   Platforms,
   Users,
+  Sequelize,
 } = require("../models");
 
 router.get("/", async (req, res) => {
@@ -134,6 +136,33 @@ router.get("/:quiz_id", async (req, res) => {
     });
   }
 });
+
+router.put("/toggle_publish/:platform_id", async (req, res) => {
+  const platform_id = req.body.quiz_fields.platform_id;
+  const quiz_field = req.body.quiz_fields.quizzes;
+  const platform = await Platforms.findOne({
+    where: {
+      platform_id: platform_id,
+    }
+  })
+
+  const quiz_list = await platform
+    .getQuizzes()
+    .catch((err) => {console.log("Get Platform Quizzes error: ", err);
+  });
+
+  for (let i = 0; i < quiz_list.length; ++i) {
+    await Quizzes.update(quiz_field[i], {
+      where: {
+        quiz_id: quiz_list[i].dataValues.quiz_id,
+      }
+    }).catch((err) => {
+        console.log("PUT Quiz error: ", err);
+    });
+  }
+  res.sendStatus(200);
+  return;
+})
 
 router.post("/:quiz_id/results", async (req, res) => {
   const quiz_id = req.params.quiz_id;
