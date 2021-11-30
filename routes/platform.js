@@ -35,6 +35,7 @@ router.get("/:platform_id", async (req, res) => {
           [Op.like]: "%" + keyword + "%",
         },
       },
+      order: [["createdAt", "DESC"]]
     })
     .catch((err) => {
       console.log("Get Platform Quizzes error: ", err);
