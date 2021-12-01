@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: true,
     },
     time_limit: {
-      type: DataTypes.TIME,
+      type: DataTypes.BIGINT,
       allowNull: true,
     },
     icon_photo: {
