@@ -10,7 +10,16 @@ router.get("/", async (req, res) => {
   res.status(200).send({ quizzes: quizzes, platforms: platforms });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", isAuthenticated, async (req, res) => {
+  const user = req.user;
+  const platform = await user.getPlatform()
+    .catch(err => {
+      console.log("Creating Platform");
+    });
+  if(platform !== null) {
+    res.sendStatus(400);
+    return;
+  }
   const platform_fields = req.body.platform_fields;
   const platform = await Platforms.create(platform_fields).catch((err) => {
     console.log("POST Platform: ", err);
@@ -18,8 +27,7 @@ router.post("/", async (req, res) => {
   res.status(201).json(platform);
 });
 
-router.get("/:platform_id", isAuthenticated, async (req, res) => {
-  const user = req.user;
+router.get('/:platform_id', async (req, res) => {
   const keyword = req.query.keyword;
   const platform = await Platforms.findOne({
     where: { platform_id: req.params.platform_id },
@@ -30,11 +38,74 @@ router.get("/:platform_id", isAuthenticated, async (req, res) => {
     res.sendStatus(404);
     return;
   }
-  if(user.user_id != platform.user_id){
-    res.sendStatus(401);
+
+  const quizzes = await platform
+    .getQuizzes({
+      where: {
+        quiz_name: {
+          [Op.like]: "%" + keyword + "%",
+        },
+        is_published: true,
+      },
+      order: [["createdAt", "DESC"]]
+    })
+    .catch((err) => {
+      console.log("Get Platform Quizzes error: ", err);
+    });
+  if (quizzes == null) {
+    res.sendStatus(404);
     return;
   }
-  
+  const points = await platform
+    .getPoints({
+      limit: 5,
+      order: [["points", "DESC"]],
+    })
+    .catch((err) => {
+      console.log("GET Platforms Points: ", err);
+    });
+
+  if (points === null) {
+    res.sendStatus(500);
+    return;
+  }
+  const topusers = [];
+  for (let i = 0; i < points.length; ++i) {
+    const user = await Users.findOne({
+      where: {
+        user_id: points[i].user_id,
+      },
+    }).catch((err) => {
+      console.log("GET Platforms Points User: ", err);
+    });
+    if (user === null) {
+      res.sendStatus(500);
+      return;
+    }
+    topusers.push(user);
+  }
+  res.json({
+    platform_name: platform.platform_name,
+    user_id: platform.user_id,
+    icon_photo: platform.icon_photo,
+    banner_photo: platform.banner_photo,
+    quizzes: quizzes,
+    topFiveUsers: topusers,
+  });
+});
+
+router.get("/:platform_id/creator", isAuthenticated, async (req, res) => {
+  const user = req.user;
+  const keyword = req.query.keyword;
+  const platform = await user.getPlatform()
+    .catch(err => {
+      console.log("Get Platform error: ", err);
+    });
+  if (platform === null || platform.platform_id != req.params.platform_id) {
+    res.sendStatus(403);
+    return;
+  }
+
   const quizzes = await platform
     .getQuizzes({
       where: {
@@ -108,10 +179,8 @@ router.delete("/:platform_id", async (req, res) => {
 router.put("/:platform_id/creator", isAuthenticated, async (req, res) => {
   const user = req.user;
   const platform = await user.getPlatform();
-  console.log(platform.platform_id)
-  console.log(req.params.platform_id);
-  if(platform.platform_id != req.params.platform_id){
-    res.sendStatus(401);
+  if (platform.platform_id != req.params.platform_id) {
+    res.sendStatus(403);
     return;
   }
 
