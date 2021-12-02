@@ -188,11 +188,11 @@ router.post("/:quiz_id/results", async (req, res) => {
     const answers = await questions[i].getAnswers({
       order: [["answer_id", "ASC"]],
     });
-    if (answers == null) {
+    if (answers === null) {
       res.sendStatus(500);
       return;
     }
-    if (answers[selected_answers[i]].is_correct) n_correct++;
+    if (selected_answers[i] > -1 && answers[selected_answers[i]].is_correct) n_correct++;
   }
   const multiplier = duration === null ? 1 : quiz.time_limit / duration;
   const points = n_correct * multiplier;
