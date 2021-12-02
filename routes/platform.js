@@ -21,10 +21,10 @@ router.post("/", isAuthenticated, async (req, res) => {
     return;
   }
   const platform_fields = req.body.platform_fields;
-  const platform = await Platforms.create(platform_fields).catch((err) => {
+  const new_platform = await Platforms.create(platform_fields).catch((err) => {
     console.log("POST Platform: ", err);
   });
-  res.status(201).json(platform);
+  res.status(201).json(new_platform);
 });
 
 router.get('/:platform_id', async (req, res) => {
