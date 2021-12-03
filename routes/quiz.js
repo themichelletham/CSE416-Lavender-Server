@@ -20,18 +20,13 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", isAuthenticated, async (req, res) => {
-  //res.send("Hello quizzes");
-  const platform = await Platforms.findOne({
-    where: {
-      platform_id: req.body.quiz_fields.platform_id,
-    },
-  }).catch((err) => {
-    console.log("authUserIsCreating", err);
-    res.status(500);
-  });
-
-  if (platform.user_id !== req.body.user_id) {
-    res.sendStatus(401);
+  const user = req.user;
+  const platform = await user.getPlatform()
+    .catch(err => {
+      console.log("POST Quiz: getPlatform: ", err);
+    });
+  if (platform === null || platform.platform_id != req.body.quiz_fields.platform_id) {
+    res.sendStatus(403);
     return;
   }
 
@@ -137,6 +132,42 @@ router.get("/:quiz_id", async (req, res) => {
   }
 });
 
+router.get("/:quiz_id/creator", isAuthenticated, async (req, res) => {
+  const quiz_id = req.params.quiz_id;
+  const user = req.user;
+  const platform = await user.getPlatform()
+    .catch(err => {
+      console.log("Get Quiz Creator: ", err);
+    });
+  if (platform === null) {
+    res.sendStatus(403);
+    return;
+  }
+  var quiz = await platform.getQuizzes({ where: { quiz_id: quiz_id } })
+    .catch(err => {
+      console.log("GET Quiz creator: quiz: ", err);
+    });
+  if (quiz === null || quiz[0] === null) {
+    res.sendStatus(403);
+    return;
+  }
+  quiz = quiz[0];
+  const questions = await quiz.getQuestions();
+  let answers = [];
+  for (let i = 0; i < questions.length; ++i) {
+    let answer_list = await questions[i].getAnswers();
+    answers.push(answer_list);
+  }
+  res.json({
+    platform: platform,
+    quiz: quiz,
+    questions: questions,
+    answers: answers,
+    icon_photo: quiz.icon_photo,
+    is_published: quiz.is_published,
+  });
+});
+
 router.put("/toggle_publish/:platform_id", async (req, res) => {
   const platform_id = req.body.quiz_fields.platform_id;
   const quiz_field = req.body.quiz_fields.quizzes;
@@ -148,8 +179,9 @@ router.put("/toggle_publish/:platform_id", async (req, res) => {
 
   const quiz_list = await platform
     .getQuizzes()
-    .catch((err) => {console.log("Get Platform Quizzes error: ", err);
-  });
+    .catch((err) => {
+      console.log("Get Platform Quizzes error: ", err);
+    });
 
   for (let i = 0; i < quiz_list.length; ++i) {
     await Quizzes.update(quiz_field[i], {
@@ -157,7 +189,7 @@ router.put("/toggle_publish/:platform_id", async (req, res) => {
         quiz_id: quiz_list[i].dataValues.quiz_id,
       }
     }).catch((err) => {
-        console.log("PUT Quiz error: ", err);
+      console.log("PUT Quiz error: ", err);
     });
   }
   res.sendStatus(200);
@@ -265,8 +297,28 @@ router.post("/:quiz_id/results", async (req, res) => {
   res.status(201).send(points_rec);
 });
 
-router.put("/:quiz_id/creator", async (req, res) => {
+router.put("/:quiz_id/creator", isAuthenticated, async (req, res) => {
   const quiz_id = req.params.quiz_id;
+
+  const user = req.user;
+  const platform = await user.getPlatform()
+    .catch(err => {
+      console.log("PUT quiz creator: getPlatform: ", err);
+    });
+  if (platform === null) {
+    res.sendStatus(403);
+    return;
+  }
+  var quiz = await platform.getQuizzes({ where: { quiz_id: quiz_id } })
+    .catch(err => {
+      console.log("PUT quiz creator: getQuiz: ", err);
+    });
+  if (quiz === null || quiz[0].platform_id != platform.platform_id) {
+    res.sendStatus(403);
+    return;
+  }
+  quiz = quiz[0]
+
   const updates = req.body.quiz_fields;
   await Quizzes.update(updates, {
     where: {
