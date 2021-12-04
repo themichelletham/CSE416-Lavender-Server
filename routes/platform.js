@@ -12,11 +12,10 @@ router.get("/", async (req, res) => {
 
 router.post("/", isAuthenticated, async (req, res) => {
   const user = req.user;
-  const platform = await user.getPlatform()
-    .catch(err => {
-      console.log("Creating Platform");
-    });
-  if(platform !== null) {
+  const platform = await user.getPlatform().catch((err) => {
+    console.log("Creating Platform");
+  });
+  if (platform !== null) {
     res.sendStatus(400);
     return;
   }
@@ -27,7 +26,7 @@ router.post("/", isAuthenticated, async (req, res) => {
   res.status(201).json(new_platform);
 });
 
-router.get('/:platform_id', async (req, res) => {
+router.get("/:platform_id", async (req, res) => {
   const keyword = req.query.keyword;
   const platform = await Platforms.findOne({
     where: { platform_id: req.params.platform_id },
@@ -47,7 +46,7 @@ router.get('/:platform_id', async (req, res) => {
         },
         is_published: true,
       },
-      order: [["createdAt", "DESC"]]
+      order: [["createdAt", "DESC"]],
     })
     .catch((err) => {
       console.log("Get Platform Quizzes error: ", err);
@@ -97,10 +96,9 @@ router.get('/:platform_id', async (req, res) => {
 router.get("/:platform_id/creator", isAuthenticated, async (req, res) => {
   const user = req.user;
   const keyword = req.query.keyword;
-  const platform = await user.getPlatform()
-    .catch(err => {
-      console.log("Get Platform error: ", err);
-    });
+  const platform = await user.getPlatform().catch((err) => {
+    console.log("Get Platform error: ", err);
+  });
   if (platform === null || platform.platform_id != req.params.platform_id) {
     res.sendStatus(403);
     return;
@@ -113,7 +111,7 @@ router.get("/:platform_id/creator", isAuthenticated, async (req, res) => {
           [Op.like]: "%" + keyword + "%",
         },
       },
-      order: [["createdAt", "DESC"]]
+      order: [["createdAt", "DESC"]],
     })
     .catch((err) => {
       console.log("Get Platform Quizzes error: ", err);
@@ -183,9 +181,12 @@ router.put("/:platform_id/creator", isAuthenticated, async (req, res) => {
     res.sendStatus(403);
     return;
   }
+  console.log(req.body.platform_fields);
 
   const platform_fields = {};
   platform_fields.platform_name = req.body.platform_fields.platform_name;
+  platform_fields.icon_photo = req.body.platform_fields.icon_photo;
+  platform_fields.banner_photo = req.body.platform_fields.banner_photo;
   await Platforms.update(platform_fields, {
     where: {
       platform_id: req.params.platform_id,
