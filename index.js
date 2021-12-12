@@ -1,4 +1,5 @@
 const express = require("express");
+const crypto = require("crypto");
 const passport = require("passport");
 const cors = require("cors");
 const app = express();
@@ -15,14 +16,12 @@ app.use(cors({ origin: config.clientUrl, credentials: true }));
 //  maxAge: 24*60*60*1000,
 //  keys: ['randomSalt'], //replace with bcrypt or something
 //  //credentials: true,
-//  sameSite: "none",
-//  secure: true
 //}))
 
 app.set("trust proxy", 1);
 
 app.use(session({
-  secret: 'randommSalt',
+  secret: crypto.randomBytes(128).toString('base64'),
   resave: true,
   saveUninitialized: true,
   cookie: {
