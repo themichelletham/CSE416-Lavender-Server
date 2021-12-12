@@ -276,6 +276,7 @@ router.post("/:quiz_id/results", async (req, res) => {
       user_id: user_id,
       quiz_id: quiz_id,
       points: points,
+      duration: duration,
     }).catch((err) => {
       console.log("POST Quiz Results: ", err);
     });
@@ -337,6 +338,7 @@ router.post("/:quiz_id/view-results", async (req, res) => {
     return;
   }
 
+  const duration = history.duration;
   const points = await Points.findOne({
     where: { platform_id: platform_id, user_id: user_id },
   }).catch((err) => {
@@ -381,6 +383,7 @@ router.post("/:quiz_id/view-results", async (req, res) => {
       answers: answers,
       selected_answers: selected_answers,
       points: points,
+      duration: duration,
     });
   }
 });
@@ -390,7 +393,6 @@ router.post("/:quiz_id/view-results-unauth", async (req, res) => {
   const platform_id = req.body.platform_id;
   const selected_answers = req.body.selected_answers;
   const duration = req.body.duration;
-
   const platform = await Platforms.findOne({
     where: {
       platform_id: platform_id,
@@ -410,6 +412,7 @@ router.post("/:quiz_id/view-results-unauth", async (req, res) => {
     return;
   }
 
+  let answered_questions = 0;
   // Calculating points score
   const questions = await quiz.getQuestions();
   let n_correct = 0;
@@ -422,8 +425,15 @@ router.post("/:quiz_id/view-results-unauth", async (req, res) => {
       res.sendStatus(500);
       return;
     }
-    if (answers[selected_answers[i]].is_correct) n_correct++;
+
+    if (answers[selected_answers[i]]) {
+      answered_questions++;
+      if (answers[selected_answers[i]].is_correct) {
+        n_correct++;
+      }
+    }
     ans.push(answers);
+    console.log(ans);
   }
 
   const multiplier = duration == null ? 1 : quiz.time_limit / duration;
@@ -435,6 +445,8 @@ router.post("/:quiz_id/view-results-unauth", async (req, res) => {
     answers: ans,
     selected_answers: selected_answers,
     points: points,
+    duration: duration,
+    answered_all_questions: answered_questions === questions.length,
   });
 });
 
