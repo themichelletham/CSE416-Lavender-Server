@@ -319,6 +319,7 @@ router.put("/:quiz_id/creator", isAuthenticated, async (req, res) => {
     console.log("PUT quiz creator: ", err);
     res.sendStatus(404);
   });
+  res.sendStatus(204);
 });
 
 router.post("/:quiz_id/view-results", async (req, res) => {
